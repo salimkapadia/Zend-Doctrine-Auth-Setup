@@ -1,17 +1,26 @@
-<phpunit bootstrap="./bootstrap.php">
-    <testsuite name="Application Test Suite">
+<phpunit bootstrap="./application/bootstrap.php" colors="true">
+
+    <testsuite name="Application">
         <directory>./application</directory>
+        <directory>./library/application</directory>
     </testsuite>
-    <testsuite name="Library Test Suite">
-        <directory>./library</directory>
-    </testsuite>
-    
+        
     <filter>
-        <!-- If Zend Framework is inside your project's library, uncomment this filter -->
-        <!-- 
         <whitelist>
-            <directory suffix=".php">../../library/Zend</directory>
+            <directory suffix=".php">../application</directory>
+            <directory suffix=".php">../library</directory>
+            <exclude>
+                <directory suffix=".phtml">../application</directory>
+                <directory suffix=".php">../library/Doctrine</directory>
+                <directory suffix=".php">../library/Bisna</directory>
+                <directory suffix=".php">../library/Symfony</directory>
+                <file suffix=".php">../application/Bootstrap.php</file>
+            </exclude>
         </whitelist>
-        -->
     </filter>
+    <logging>
+        <log type="coverage-html" target="./log/report" charset="UTF-8"
+            yui="true" highlight="true" lowUpperBound="50" highLowerBound="80" />            
+        <log type="testdox" target="./log/testdox.html" charset="UTF-8"/>                        
+    </logging>
 </phpunit>
