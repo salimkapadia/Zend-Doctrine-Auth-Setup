@@ -5,7 +5,8 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Table(name="user")
  * @ORM\Entity
- * @author Salim Kapadia
+ * 
+ * @author Salim Kapadia <salimk786@gmail.com> 
  */
 class User {   
     
