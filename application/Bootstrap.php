@@ -16,5 +16,22 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap
         $fmmAutoloader = new \Doctrine\Common\ClassLoader('Bisna');
         $autoloader->pushAutoloader(array($fmmAutoloader, 'loadClass'), 'Bisna');
     }
+    /**
+     *
+     * @return Zend_Auth
+     */
+    protected function _initAuth(){
+        $this->bootstrap('session');
+        $auth = Zend_Auth::getInstance(); 
+        $auth->setStorage(new \Imixer\Auth\Storage\Session('imixer_session_storage')); 
+         
+        return $auth;        
+    }      
+    protected function _initLogger(){
+    	$logger = new Zend_Log();
+        $writer = new Zend_Log_Writer_Stream('/var/log/php_errors.log');
+        $logger->addWriter($writer);
+        Zend_Registry::set('logger',$logger);
+    }      
 }
 

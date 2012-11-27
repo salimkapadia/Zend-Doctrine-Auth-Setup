@@ -1,14 +1,20 @@
 <?php
-namespace Imixer\Domain\Entities;
-use Doctrine\ORM\Mapping as ORM;
 /**
- *
- * @ORM\Table(name="user")
- * @ORM\Entity
  * 
  * @author Salim Kapadia <salimk786@gmail.com> 
+ * 
  */
-class User {   
+
+namespace Imixer\Domain\Entities;
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * 
+ * @ORM\Entity(repositoryClass="Imixer\Domain\Repositories\UserRepository")
+ * @ORM\Table(name="user") 
+ 
+ */
+class User extends \Imixer\Domain\Entity{   
     
     /**
      * @var integer $id
@@ -74,7 +80,7 @@ class User {
      * @ORM\Column(name="date_updated", type="datetime", nullable=false)
      */
     private $dateUpdated;
-
+    
     public function __construct(){
         $this->isActive = TRUE;
         $this->dateCreated = new \DateTime("now");
@@ -215,5 +221,5 @@ class User {
      */
     public function setDateUpdated(\DateTime $datUpdated){
         $this->dateUpdated = $datUpdated;
-    }         
+    }           
 }
