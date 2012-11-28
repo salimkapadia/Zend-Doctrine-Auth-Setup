@@ -9,7 +9,7 @@ class ModelTestCase extends PHPUnit_Framework_TestCase{
      *
      * @var \Bisna\Application\Container\DoctrineContainer
      */
-    protected $doctrineContainer;
+    protected static $doctrineContainer;
     /**
      *
      * @var boolean 
@@ -19,7 +19,7 @@ class ModelTestCase extends PHPUnit_Framework_TestCase{
      *
      * @var array 
      */
-    protected $users = array(
+    protected static $users = array(
                         array(
                             "firstName" => "Ibn",
                             "lastName" => "Sina",
@@ -30,7 +30,7 @@ class ModelTestCase extends PHPUnit_Framework_TestCase{
                     );
     
     public function __construct(){
-        $this->doctrineContainer = Zend_Registry::get('doctrine');        
+        self::$doctrineContainer = Zend_Registry::get('doctrine');        
     }
     
     /**
@@ -39,13 +39,13 @@ class ModelTestCase extends PHPUnit_Framework_TestCase{
      * @param type $namespace - Namespace of the entities.
      * @return array 
      */
-    public function getClassMetas($path, $namespace) {
+    public static function getClassMetas($path, $namespace) {
         $metas = array();
         if ($handle = opendir($path)){
             while (false !== ($file = readdir($handle))){
                 if (strstr($file, ".php")){
                     list($class) = explode('.', $file);
-                    $metas[] = $this->doctrineContainer->getEntityManager()->getClassMetadata($namespace . $class);
+                    $metas[] = self::$doctrineContainer->getEntityManager()->getClassMetadata($namespace . $class);
                 }
             }
         }
@@ -54,9 +54,9 @@ class ModelTestCase extends PHPUnit_Framework_TestCase{
     /**
      * This function loads data into our test db for our tests to consume 
      */
-    private function loadTestData(){
-        $em = $this->doctrineContainer->getEntityManager();        
-        foreach($this->users as $user){
+    private static function loadTestData(){
+        $em = self::$doctrineContainer->getEntityManager();        
+        foreach(self::$users as $user){
             $u = new Imixer\Domain\Entities\User();
             $u->setFirstName($user["firstName"]);
             $u->setLastName($user["lastName"]);
@@ -70,29 +70,19 @@ class ModelTestCase extends PHPUnit_Framework_TestCase{
     public function canCallTearDown(){
         return $this->hasTearDownHappened;
     }
-    public function setUp()
+    public static function setUpBeforeClass()
     {                
-        $tool = new \Doctrine\ORM\Tools\SchemaTool($this->doctrineContainer->getEntityManager());        
-        $tool->createSchema($this->getClassMetas(APPLICATION_PATH . '/../library/Imixer/Domain/Entities', 'Imixer\Domain\Entities\\'));
-        $this->loadTestData();
-
-        // the below anonymous function will be called on shutdown in the event
-        // teardown does not get called and the only time tearDown doesn't get
-        // called is when an exception prevents the execution of the unit tests.
-        $that = $this;
-        register_shutdown_function(function() use ($that) {
-                if (!$that->canCallTearDown()){
-                    $that->tearDown();
-                }
-            });        
+        $tool = new \Doctrine\ORM\Tools\SchemaTool(self::$doctrineContainer->getEntityManager());        
+        $tool->createSchema(self::getClassMetas(APPLICATION_PATH . '/../library/Imixer/Domain/Entities', 'Imixer\Domain\Entities\\'));
+        self::loadTestData();      
             
-        parent::setUp();        
+        parent::setUpBeforeClass();        
     }
 
-    public function tearDown(){    
-        $this->hasTearDownHappened = true;
-        $tool = new \Doctrine\ORM\Tools\SchemaTool($this->doctrineContainer->getEntityManager());
-        $tool->dropSchema($this->getClassMetas(APPLICATION_PATH . '/../library/Imixer/Domain/Entities', 'Imixer\Domain\Entities\\'));        
-        parent::tearDown();        
+    public static function tearDownAfterClass(){    
+        $hasTearDownHappened = true;
+        $tool = new \Doctrine\ORM\Tools\SchemaTool(self::$doctrineContainer->getEntityManager());        
+        $tool->dropSchema(self::getClassMetas(APPLICATION_PATH . '/../library/Imixer/Domain/Entities', 'Imixer\Domain\Entities\\'));        
+        parent::tearDownAfterClass();        
     }
 }
