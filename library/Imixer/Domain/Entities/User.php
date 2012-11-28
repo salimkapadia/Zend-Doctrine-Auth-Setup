@@ -1,18 +1,14 @@
 <?php
 /**
- * 
  * @author Salim Kapadia <salimk786@gmail.com> 
- * 
  */
 
 namespace Imixer\Domain\Entities;
-use Doctrine\ORM\Mapping as ORM;
 
+use Doctrine\ORM\Mapping as ORM;
 /**
- * 
  * @ORM\Entity(repositoryClass="Imixer\Domain\Repositories\UserRepository")
  * @ORM\Table(name="user") 
- 
  */
 class User extends \Imixer\Domain\Entity{   
     
@@ -219,7 +215,7 @@ class User extends \Imixer\Domain\Entity{
      *
      * @param \DateTime $datUpdated
      */
-    public function setDateUpdated(\DateTime $datUpdated){
-        $this->dateUpdated = $datUpdated;
+    public function setDateUpdated(\DateTime $datUpdated){        
+        $this->dateUpdated = $datUpdated;        
     }           
 }

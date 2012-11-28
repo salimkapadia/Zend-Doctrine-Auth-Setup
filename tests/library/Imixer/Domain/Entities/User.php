@@ -6,68 +6,51 @@
  */
 namespace Imixer\Domain\Entities;
 
-class UserTest extends \ModelTestCase{
-    private $testUsers = array(
-            array(
-                "firstName" => "Ibn",
-                "lastName" => "Sina",
-                "email" => "Avicenna@thebookofhealing.com",
-                "password" => "goodhealth",
-                "salt" => "salt"
-            )
-    );
-    
-    public function testCanCreateUser(){
+class UserTest extends \ModelTestCase{    
+    public function testCanCreateUserInstance(){
         $this->assertInstanceOf('Imixer\Domain\Entities\User',new User());
     }
-    public function testCanSaveFirstLastName(){
-        $u= new User(); //Since the first line identifies my namespace, this is 
-                        //the same as new Imixer\Domain\Entities\User()
-        
-        $u->setFirstName($this->testUsers[0]["firstName"]);
-        $u->setLastName($this->testUsers[0]["lastName"]);
-        $u->setEmail($this->testUsers[0]["email"]);
-        $u->setPassword($this->testUsers[0]["password"]);
-        $u->setSalt($this->testUsers[0]["salt"]);
-        
+    public function testUserRecordExists(){
         $em = $this->doctrineContainer->getEntityManager();
-        $em->persist($u);
-        $em->flush(); //this will write my user to the db.
-        
-        //Now let's do a find operation to confirm it was written.        
-        $users = $em->createQuery("select u from Imixer\Domain\Entities\User u")->execute();
-        $this->assertEquals(1,count($users));        
-        $this->assertEquals($this->testUsers[0]["firstName"], $users[0]->getFirstName());
-        $this->assertEquals($this->testUsers[0]["lastName"], $users[0]->getLastName());        
+        $results = $em->createQuery("select u from Imixer\Domain\Entities\User u where u.email = '{$this->users[0]['email']}'")->execute();
+        $this->assertEquals(1,count($results[0]));        
     }
-    public function testDateUpdated(){
-        //this function shows how the date updated column gets updated via
-        //Doctrine @HasLifecycleCallbacks
-        
-        $u= new User(); //Since the first line identifies my namespace, this is 
-                        //the same as new Imixer\Domain\Entities\User()
-        
-        $u->setFirstName($this->testUsers[0]["firstName"]);
-        $u->setLastName($this->testUsers[0]["lastName"]);
-        $u->setEmail($this->testUsers[0]["email"]);
-        $u->setPassword($this->testUsers[0]["password"]);
-        $u->setSalt($this->testUsers[0]["salt"]);
-        
+    public function testCanUpdateRecord(){
         $em = $this->doctrineContainer->getEntityManager();
-        $em->persist($u);
-        $em->flush(); //this will write my user to the db.
-        
-        $user = $em->getRepository('Imixer\Domain\Entities\User')->findOneBy(
-                array('email' => $this->testUsers[0]["email"]));
-        
-        $dateUpdated = $user->getDateUpdated();
-        $user->setSalt("newSalt");        
-        $em->persist($user);
-        $em->flush();        
-        
-        $users = $em->createQuery("select u from Imixer\Domain\Entities\User u")->execute();
-        $this->assertEquals(1,count($users));        
-        $this->assertNotEquals($dateUpdated, $users[0]->getDateUpdated());                
-    }
+        $results = $em->createQuery("select u from Imixer\Domain\Entities\User u where u.email = '{$this->users[0]['email']}'")->execute();
+        $user = $results[0];
+        $newSaltKey = "abcdefghijklmnop";
+        $user->setSalt($newSaltKey);
 
+        $em = $this->doctrineContainer->getEntityManager();
+        $em->persist($user);
+        $em->flush(); //this will write my user to the db.
+
+        $record = $em->getRepository('Imixer\Domain\Entities\User')->findOneBy(
+                        array('email' => $user->getEmail())
+            );
+        
+        $this->assertEquals($newSaltKey, $record->getSalt());          
+    }    
+    public function testHasLifecycleCallbackPreUpdate(){
+        $em = $this->doctrineContainer->getEntityManager();
+        $record = $em->getRepository('Imixer\Domain\Entities\User')->findOneBy(
+                        array('email' => $this->users[0]['email'])
+            );
+        $dateUpdatedBeforeUpdate = $record->getDateUpdated();
+
+        $newSaltKey = "abcdefghijklmnop";
+        $record->setSalt($newSaltKey);
+
+        $em = $this->doctrineContainer->getEntityManager();
+        $em->persist($record);
+        $em->flush(); //this will write my user to the db.
+        
+        $record = $em->getRepository('Imixer\Domain\Entities\User')->findOneBy(
+                        array('email' => $this->users[0]['email'])
+            );
+        $dateUpdatedAfterUpdate = $record->getDateUpdated();
+
+        $this->assertNotEquals($dateUpdatedBeforeUpdate, $dateUpdatedAfterUpdate);
+    }
 }
