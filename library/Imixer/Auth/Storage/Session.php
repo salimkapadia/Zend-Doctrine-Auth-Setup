@@ -16,32 +16,31 @@ class Session extends \Zend_Auth_Storage_Session {
     }
     
     public function isEmpty() {
-        return parent::isEmpty() || $this->read() === null;
+        return parent::isEmpty() || $this->read() === NULL;
     }
     
     /**
-     * @param \Entities\Users|null $contents 
+     * @param integer $identifier 
      */
-    public function write($contents) {        
-        $em = \Zend_Registry::get('doctrine')->getEntityManager();
-        $identifier = $em->find('\Imixer\Domain\Entities\User',$contents);
-        $contents = empty($identifier) ? null : $identifier->getId();
-        parent::write($contents);
+    public function write($identifier) {  
+        //user credentials have already been verified so we simply just pass
+        //the user identifier to parent.
+        parent::write($identifier);
     }
     
     /**
-     * @return \Imixer\Domain\Entities\User|null
+     * @return \Imixer\Domain\Entities\User|NULL
      */
     public function read() {
-        $data = parent::read();
-        if(empty($data)) {
-            return null;
+        $identifier = parent::read();
+        if(empty($identifier)) {
+            return NULL;
         }
         $em = \Zend_Registry::get('doctrine')->getEntityManager();
-        $data = $em->find('\Imixer\Domain\Entities\User', $data);
-        if($data === null) {
-            parent::write(null);
+        $user = $em->find('\Imixer\Domain\Entities\User', $identifier);
+        if($user === NULL) {
+            parent::write(NULL);
         }
-        return $data;
+        return $user;
     }    
 }
